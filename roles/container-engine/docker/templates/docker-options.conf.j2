@@ -1,6 +1,7 @@
 [Service]
 Environment="DOCKER_OPTS={{ docker_options|default('') }} --iptables={{ docker_iptables_enabled | default('false') }} \
 --exec-opt native.cgroupdriver={{ docker_cgroup_driver }} \
+{% if ansible_os_family in ["Kylin Linux Advanced Server"] %} native.umask=normal {% endif %} \
 {% for i in docker_insecure_registries %}--insecure-registry={{ i }} {% endfor %} \
 {% for i in docker_registry_mirrors %}--registry-mirror={{ i }} {% endfor %} \
 --data-root={{ docker_daemon_graph }} \
