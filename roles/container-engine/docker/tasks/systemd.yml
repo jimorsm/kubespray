@@ -28,7 +28,7 @@
   register: docker_service_file
   notify: restart docker
   when:
-    - not ansible_os_family in ["Flatcar Container Linux by Kinvolk"]
+    - not ansible_os_family in ["Flatcar Container Linux by Kinvolk", "Kylin Linux Advanced Server"]
     - not is_fedora_coreos
 
 - name: Write docker options systemd drop-in
@@ -36,13 +36,23 @@
     src: docker-options.conf.j2
     dest: "/etc/systemd/system/docker.service.d/docker-options.conf"
   notify: restart docker
+  when: not ansible_os_family in ["Kylin Linux Advanced Server"]
 
 - name: Write docker dns systemd drop-in
   template:
     src: docker-dns.conf.j2
     dest: "/etc/systemd/system/docker.service.d/docker-dns.conf"
   notify: restart docker
-  when: dns_mode != 'none' and resolvconf_mode == 'docker_dns'
+  when: 
+    - dns_mode != 'none' and resolvconf_mode == 'docker_dns'
+    - not ansible_os_family in ["Kylin Linux Advanced Server"]
+
+- name: Write daemon.json
+  template:
+    src: daemon.json.j2
+    dest: "/etc/docker/daemon.json"
+  notify: restart docker
+  when: ansible_os_family in ["Kylin Linux Advanced Server"]
 
 - name: Copy docker orphan clean up script to the node
   copy:

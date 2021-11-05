@@ -348,6 +348,8 @@
       systemd-networkd
       {%- elif ansible_os_family == "Debian" -%}
       networking
+      {%- elif ansible_os_family == "Kylin Linux Advanced Server" -%}
+      NetworkManager
       {%- endif %}
     state: restarted
   when:

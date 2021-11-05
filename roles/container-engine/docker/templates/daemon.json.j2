@@ -1,0 +1,26 @@
+{
+  "data-root": "{{ docker_daemon_graph }}",
+  "registry-mirrors": [{% for i in docker_registry_mirrors %}"{{ i }}"{% if not loop.last %},{% endif %}{% endfor %}],
+  "insecure-registries": [{% for i in docker_insecure_registries %}"{{ i }}"{% if not loop.last %},{% endif %}{% endfor %}],
+  "exec-opts": [
+    "native.cgroupdriver={{ docker_cgroup_driver }}"{% if ansible_os_family in ["Kylin Linux Advanced Server"] %} ,
+    "native.umask=normal" {% endif %}
+  ],
+{% if dns_mode != 'none' and resolvconf_mode == 'docker_dns' %}
+  "dns": [
+{% for d in docker_dns_servers %}
+    "{{ d }}"{% if not loop.last %} , {% endif %}
+{% endfor %}
+  ],
+  "dns-search": [
+{% for d in docker_dns_search_domains %}
+    "{{ d }}"{% if not loop.last %} , {% endif %}
+{% endfor %}
+  ],
+{% endif %}
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}

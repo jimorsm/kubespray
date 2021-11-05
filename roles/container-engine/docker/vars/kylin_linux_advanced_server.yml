@@ -1,0 +1,5 @@
+---
+docker_package_info:
+  pkgs:
+    - "docker-engine"
+    - "policycoreutils-python"
