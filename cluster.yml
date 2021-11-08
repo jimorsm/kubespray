@@ -45,6 +45,12 @@
         etcd_events_cluster_setup: "{{ etcd_events_cluster_enabled }}"
       when: not etcd_kubeadm_enabled| default(false)
 
+- name: External-lb
+  import_playbook: external-lb.yml
+  when:
+    - loadbalancer_apiserver is defined
+    - loadbalancer_apiserver.address is defined
+
 - hosts: k8s-cluster
   gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"

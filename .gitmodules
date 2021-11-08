@@ -1,0 +1,6 @@
+[submodule "roles/external-lb/haproxy"]
+	path = roles/external-lb/haproxy
+	url = https://github.com/jimorsm/ansible-haproxy.git
+[submodule "roles/external-lb/keepalived"]
+	path = roles/external-lb/keepalived
+	url = https://github.com/jimorsm/ansible-keepalived.git

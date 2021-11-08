@@ -154,7 +154,7 @@
     - runc-1.0.0-101.rc9.gitc1485a1.ky10.x86_64.rpm
 
 - name: Upgrade runc for Kylin
-  shell: 'cd /tmp && rpm -ivh --replacefiles --nodeps runc-1.0.0-101.rc9.gitc1485a1.ky10.x86_64.rpm criu-3.12-2.el7.x86_64.rpm libprotobuf-c1-1.4.0-alt1.x86_64.rpm policycoreutils-python-2.5-34.el7.x86_64.rpm'
+  shell: 'cd /tmp && rpm -ivh --replacefiles --nodeps runc-1.0.0-101.rc9.gitc1485a1.ky10.x86_64.rpm criu-3.12-2.el7.x86_64.rpm libprotobuf-c1-1.4.0-alt1.x86_64.rpm'
   args:
     executable: /bin/bash
   ignore_errors: yes

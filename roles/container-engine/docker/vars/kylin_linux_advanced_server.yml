@@ -2,4 +2,4 @@
 docker_package_info:
   pkgs:
     - "docker-engine"
-    - "policycoreutils-python"
+    - "python3-policycoreutils"
