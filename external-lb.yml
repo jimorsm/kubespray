@@ -1,0 +1,9 @@
+---
+- name: Prepare External Loadbalancer
+  hosts: external-lb
+  become: yes
+  gather_facts: yes
+  roles:
+    - role: bootstrap-os
+    - role: external-lb/haproxy
+    - role: external-lb/keepalived

@@ -1,0 +1,39 @@
+# Haproxy
+haproxy_mode: system
+haproxy_firewalld: false
+haproxy_selinux: false
+haproxy_frontend:
+- kube-apiserver:
+    mode: tcp
+    binds:
+        - 0.0.0.0:6443
+    default_backend: kube-apiserver
+    options: [ tcplog ]
+    timeouts:
+        - client 5000
+haproxy_backend:
+- kube-apiserver:
+    mode: tcp
+    options: [ tcplog, tcp-check ]
+    balance: roundrobin
+    timeouts:
+        - server 5000
+    servers: |-
+        {%- set _list = [] %}
+        {%- for _host in groups['kube-master'] %}
+        {%- set _list = _list.append(_host ~ ' ' ~ hostvars[_host]['ansible_host'] ~ ':' ~ loadbalancer_apiserver.address ~ ' check inter 5s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100') %}
+        {%- endfor %}
+        {{- _list }}
+
+
+# Keepalived
+vrrp_nic: ens33
+virtual_router_id: 51
+keepalived_instances:
+  lb_vip:
+    interface: "{{ vrrp_nic }}"
+    state: "{{ (groups['external-lb'].index(inventory_hostname) == 0) | ternary('MASTER','BACKUP') }}"
+    virtual_router_id: "{{ virtual_router_id }}"
+    priority: "{{ (groups['external-lb']|length - groups['external-lb'].index(inventory_hostname)) * 250 // (groups['external-lb']|length) }}"
+    vips:
+    - "{{ loadbalancer_apiserver.address }}"
