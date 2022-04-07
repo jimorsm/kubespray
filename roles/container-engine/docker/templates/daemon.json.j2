@@ -1,0 +1,19 @@
+{# workaround due to systemd drop-in not work for docker in kylin v10 server  #}
+{
+{# docker dns config #}
+{% if dns_mode != 'none' and resolvconf_mode == 'docker_dns' %}
+  "dns": [ {% for d in docker_dns_servers %}  "{{ d }}"{% if not loop.last %} , {% endif %} {% endfor %} ],
+  "dns-search": [{% for d in docker_dns_search_domains %}  "{{ d }}"{% if not loop.last %} , {% endif %} {% endfor %} ],
+{% endif %}
+{# docker options config #}
+  "exec-opts": [
+    {% if docker_mount_flags is defined and docker_mount_flags != "" %}
+    "MountFlags={{ docker_mount_flags }}",
+    {% endif %}
+    "native.cgroupdriver={{ docker_cgroup_driver }}",
+    "native.umask=normal"
+  ],
+  "registry-mirrors": [{% for i in docker_registry_mirrors %}"{{ i }}"{% if not loop.last %},{% endif %}{% endfor %}],
+  "insecure-registries": [{% for i in docker_insecure_registries %}"{{ i }}"{% if not loop.last %},{% endif %}{% endfor %}],
+  "data-root": "{{ docker_daemon_graph }}"
+}

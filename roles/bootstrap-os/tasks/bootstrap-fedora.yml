@@ -27,6 +27,10 @@
   when:
     - need_bootstrap.rc != 0
 
+- name: makecache
+  raw: "dnf makecache"
+  become: true
+
 # libselinux-python3 is required on SELinux enabled hosts
 # See https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#managed-node-requirements
 - name: Install libselinux-python3

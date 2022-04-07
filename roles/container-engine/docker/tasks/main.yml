@@ -128,6 +128,39 @@
     - not is_ostree
     - docker_package_info.pkgs|length > 0
 
+- name: check if runc version meets requirement in Kylin V10
+  shell: "runc -v | head -1 | awk '{print $3}'"
+  register: runc_version
+  when: ansible_os_family in ["Kylin Linux Advanced Server"]
+
+- name: ensure old runc removed
+  package:
+    name: "docker-runc"
+    state: "absent"
+  notify: restart docker
+  when: ansible_os_family in ["Kylin Linux Advanced Server"] and  runc_version.stdout is  version("1.0.0-rc9+dev" ,"lt")
+
+- name: Copy runc upgrade file for Kylin
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: 0755
+  when: ansible_distribution in ["Kylin Linux Advanced Server"]
+  with_items:
+    - criu-3.12-2.el7.x86_64.rpm
+    - libprotobuf-c1-1.4.0-alt1.x86_64.rpm
+    - runc-1.0.0-101.rc9.gitc1485a1.ky10.x86_64.rpm
+    - container-selinux-2.107-3.el7.noarch.rpm
+    - policycoreutils-python-2.5-34.el7.x86_64.rpm
+  when: ansible_os_family in ["Kylin Linux Advanced Server"] and  runc_version.stdout  is  version("1.0.0-rc9+dev" ,"lt")
+
+- name: Upgrade runc for Kylin
+  shell: "cd /tmp && rpm -ivh --replacefiles --nodeps runc-1.0.0-101.rc9.gitc1485a1.ky10.x86_64.rpm criu-3.12-2.el7.x86_64.rpm libprotobuf-c1-1.4.0-alt1.x86_64.rpm policycoreutils-python-2.5-34.el7.x86_64.rpm container-selinux-2.107-3.el7.noarch.rpm"
+  args:
+    executable: /bin/bash
+  ignore_errors: yes
+  when: ansible_os_family in ["Kylin Linux Advanced Server"] and  runc_version.stdout  is  version("1.0.0-rc9+dev" ,"lt")
+
 # This is required to ensure any apt upgrade will not break kubernetes
 - name: Tell Debian hosts not to change the docker version with apt upgrade
   dpkg_selections:
@@ -148,7 +181,7 @@
         state: started
       when: docker_task_result is not changed
   rescue:
-    - debug:  # noqa unnamed-task
+    - debug: # noqa unnamed-task
         msg: "Docker start failed. Try to remove our config"
     - name: remove kubespray generated config
       file:
